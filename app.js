@@ -2,17 +2,14 @@
 const container = document.getElementById("container");
 let deleted = false
 
+//SOUND
+
+
 //////////////////DATA STRUCTURE LIST
 class Node {
     constructor(value){
         this.value = value;
         this.value.setAttribute("draggable", true)
-
-        // this.dou = "xd"
-
-        this.value.addEventListener("click", function(){
-            if (this.dou === "xd")this.style.backgroundColor = "blue"
-        })
         this.next = null;
         // this.prev = null;
     }
@@ -30,7 +27,14 @@ class NodeList {
         this.last = null;
         this.division = height/cant;
         this.max = height - this.division;
-        this.candyColors = ["red", "yellow", "blue", "green", "purple", "black"]
+        this.candyColors = {
+            "red": "hue-rotate(240deg) saturate(2.4) contrast(1.5)",
+            "yellow": "hue-rotate(300deg) saturate(2) contrast(1.5)",
+            "blue":"hue-rotate(90deg) brightness(.7) contrast(2)",
+            "green":"brightness(.8)",
+            "purple": "hue-rotate(160deg) brightness(.7) contrast(1.5)",
+            "black": "invert() saturate(0)"
+        }
         this.deleteList = []
     }
     //methods
@@ -69,6 +73,15 @@ class NodeList {
 
 
         const value = document.createElement("div");
+        const image = document.createElement("img")
+
+        const colorToUse = Object.keys(this.candyColors)[Math.floor(Math.random() * 6)]
+        value.style.color = colorToUse
+
+        image.style.filter = this.candyColors[colorToUse]
+
+        image.setAttribute("src", "pink.png")
+        value.appendChild(image)
         value.classList.add("column-item");
 
         value.addEventListener("dragstart", dragStart)
@@ -78,7 +91,8 @@ class NodeList {
         value.addEventListener("dragleave", dragLeave)
         value.addEventListener("drop", dragDrop)
 
-        value.style.backgroundColor = this.candyColors[Math.floor(Math.random() * this.candyColors.length)]
+      
+        
         this.column.appendChild(value)
 
         if(!this.head){
@@ -188,15 +202,15 @@ class NodeList {
         // it just looks for elements to erase after a move is done
 
         while (aux) {
-            let color = aux.value.style.backgroundColor
+            let color = aux.value.style.color
 
-            if(aux.next && color === aux.next.value.style.backgroundColor){
-                if(aux.next.next && aux.next.next.value.style.backgroundColor === color){
+            if(aux.next && color === aux.next.value.style.color){
+                if(aux.next.next && aux.next.next.value.style.color === color){
                     
                     let aux2= aux.next.next.next;
 
                     function countSimilar(node){
-                        if (node && node.value.style.backgroundColor === color) {
+                        if (node && node.value.style.color === color) {
                             counter++
                             if (node.next)
                                 countSimilar(node.next)
@@ -224,7 +238,7 @@ const columnsArray = []
 //init the game (duh(?))
 function initGame(cant){
     for (let i = 0; i < cant; i++) {
-        const column = new NodeList(cant * 100, cant)
+        const column = new NodeList(cant * 70, cant)
         columnsArray.push(column)
         columnsArray[i].column.classList.add(i)
         for (let i = 0; i < cant; i++) {
@@ -270,7 +284,7 @@ function checkAllColumns(){
                 if(columnsArray[j] &&
                 columnsArray[j + counter] &&
                 columnsArray[j + counter].column.children[i] && 
-                columnsArray[j].column.children[i].style.backgroundColor === columnsArray[j + counter].column.children[i].style.backgroundColor){
+                columnsArray[j].column.children[i].style.color === columnsArray[j + counter].column.children[i].style.color){
                     counter++;
                     count()
                 }
@@ -300,7 +314,7 @@ const checkRow = (index) =>{
             if (columnsArray[hi] &&
                 columnsArray[hi + 1] &&
                 columnsArray[hi + 1].column.children[index] &&
-                columnsArray[hi].column.children[index].style.backgroundColor === columnsArray[hi + 1].column.children[index].style.backgroundColor) {
+                columnsArray[hi].column.children[index].style.color === columnsArray[hi + 1].column.children[index].style.color) {
                     hi++
                     counter++
                 countSimilar()
@@ -309,9 +323,12 @@ const checkRow = (index) =>{
         countSimilar()
 
         if (counter >= 3) {
-            hi2 = hi - 2
+            hi2 = hi - counter + 1
             for (let j = 0; j < counter; j++) {
-                columnsArray[hi2 + j].deleteList.push([index, 1])
+                try{
+                    columnsArray[hi2 + j].deleteList.push([index, 1])
+                }
+                catch{}
             }
             // hi = hi + counter - 1
         }
@@ -322,6 +339,9 @@ const checkRow = (index) =>{
 
 let colorBeingDragged
 let colorBeingReplaced
+
+let filterBeingDragged
+let filterBeingReplaced
 
 
 let elementBeingDragged = {
@@ -337,11 +357,13 @@ let elementBeingReplaced = {
 
 
 function dragStart() {
-    colorBeingDragged = this.style.backgroundColor;
+    colorBeingDragged = this.style.color;
     elementBeingDragged.domElement = this
+    filterBeingDragged = this.children[0].style.filter
+
 
     let distanceFromStart = parseInt(this.style.top.substring(0, this.style.top.length - 2))
-    let elementIndex = distanceFromStart/-100 + 6
+    let elementIndex = distanceFromStart/-70 + 6
     elementBeingDragged.column = parseInt(this.parentNode.classList[1])
     elementBeingDragged.index = elementIndex
 }
@@ -360,18 +382,23 @@ function dragEnd() {
     
 }
 function dragDrop() {
-    colorBeingReplaced = this.style.backgroundColor;
-    elementBeingReplaced.domElement = this;    
+    colorBeingReplaced = this.style.color;
+    elementBeingReplaced.domElement = this;
+    filterBeingReplaced = this.children[0].style.filter
 
     let distanceFromStart = parseInt(this.style.top.substring(0, this.style.top.length - 2))
-    let elementIndex = distanceFromStart / -100 + 6
+    let elementIndex = distanceFromStart / -70 + 6
     elementBeingReplaced.column = parseInt(this.parentNode.classList[1])
     elementBeingReplaced.index = elementIndex
 
 
     if(validateMove(elementBeingDragged, elementBeingReplaced)){
-        this.style.backgroundColor = colorBeingDragged
-        elementBeingDragged.domElement.style.backgroundColor = colorBeingReplaced
+
+        this.style.color = colorBeingDragged
+        elementBeingDragged.domElement.style.color = colorBeingReplaced
+
+        this.children[0].style.filter = filterBeingDragged
+        elementBeingDragged.domElement.children[0].style.filter = filterBeingReplaced
 
         columnsArray[elementBeingDragged.column].checkVertically();
         if (elementBeingDragged.column != elementBeingReplaced.column) columnsArray[elementBeingReplaced.column].checkVertically();
@@ -396,8 +423,8 @@ function dragDrop() {
             }, 630)
         // }
         // else{
-            // elementBeingDragged.domElement.style.backgroundColor = colorBeingDragged;
-            // elementBeingReplaced.domElement.style.backgroundColor = colorBeingReplaced
+            // elementBeingDragged.domElement.style.color = colorBeingDragged;
+            // elementBeingReplaced.domElement.style.color = colorBeingReplaced
         // }  
 
     }
