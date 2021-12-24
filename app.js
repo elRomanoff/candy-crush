@@ -414,18 +414,21 @@ function dragDrop() {
         })
 
 
-        // if (deleted == true) {
+     
+        if (deleted == true) {
 
             setTimeout(() => {
                 checkColumnsRepeated()
                 deleted = false;
 
             }, 630)
-        // }
-        // else{
-            // elementBeingDragged.domElement.style.color = colorBeingDragged;
-            // elementBeingReplaced.domElement.style.color = colorBeingReplaced
-        // }  
+        }
+        else{
+            elementBeingDragged.domElement.style.color = colorBeingDragged;
+            elementBeingReplaced.domElement.style.color = colorBeingReplaced;
+            elementBeingDragged.domElement.style.filter = filterBeingDragged
+            elementBeingReplaced.domElement.style.filter = filterBeingReplaced
+        }  
 
     }
 }
