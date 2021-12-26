@@ -2,8 +2,10 @@
 const container = document.getElementById("container");
 let deleted = false
 
-//SOUND
 
+//SOUND
+const deleteAudio = new Audio("sonic.mp3")
+const noDeleteAudio = new Audio("sonic2.mp3")
 
 //////////////////DATA STRUCTURE LIST
 class Node {
@@ -257,12 +259,15 @@ function checkColumnsRepeated() {
             x.deleteAllFromList()
             x.reorder()
         })
-        setTimeout(()=>{
-            if (deleted == true) {
+        
+        if (deleted == true) {
+        deleteAudio.play()
+
+            setTimeout(() => {
                 checkColumnsRepeated()
                 deleted = false;
-            }
-        },630)
+            }, 630)
+        }
        
     
     }, 700)
@@ -414,8 +419,9 @@ function dragDrop() {
         })
 
 
-     
         if (deleted == true) {
+
+            deleteAudio.play()
 
             setTimeout(() => {
                 checkColumnsRepeated()
@@ -424,13 +430,15 @@ function dragDrop() {
             }, 630)
         }
         else{
+            noDeleteAudio.play()
             elementBeingDragged.domElement.style.color = colorBeingDragged;
             elementBeingReplaced.domElement.style.color = colorBeingReplaced;
-            elementBeingDragged.domElement.style.filter = filterBeingDragged
-            elementBeingReplaced.domElement.style.filter = filterBeingReplaced
+            elementBeingDragged.domElement.children[0].style.filter = filterBeingDragged
+            elementBeingReplaced.domElement.children[0].style.filter = filterBeingReplaced
         }  
 
     }
+    else noDeleteAudio.play()
 }
 
 
